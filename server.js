@@ -5,19 +5,23 @@ var bodyParser  = require('body-parser');
 
 // Sets up the Express App
 var app = express();
-var PORT = 8889,
+var PORT = 9999,
 
 // Basic route that sends the user first to the AJAX Page
-app.get('/home', function (req, res) {
-	res.sendFile(path.join(__dirname, 'home.html'));
+app.get('/', function (request, response) {
+	response.sendFile(path.join(__dirname, 'home.html'));
+	// response.send('Hello World!');
 });
 
-// Basic route that sends the user first to the AJAX Page
-app.get('/survey', function (req, res) {
-	res.sendFile(path.join(__dirname, 'survey.html'));
+app.get('/home', function (request, response) {
+	response.sendFile(path.join(__dirname, 'home.html'));
 });
 
-// Sets up the Express app to handle data parsing
+app.get('/survey', function (request, response) {
+	response.sendFile(path.join(__dirname, 'survey.html'));
+});
+
+Sets up the Express app to handle data parsing
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text());
@@ -56,35 +60,35 @@ var friends = [{
 }];
 
 // Search for Specific Character (or all frineds) - provides JSON
-app.get('/api/:friends?', function (req, res) {
-	var chosen = req.params.friends;
+app.get('/api/:friends?', function (request, response) {
+	var chosen = request.params.friends;
 
 	if (chosen) {
 		console.log(chosen);
 
 		for (var i = 0; i < friends.length; i++) {
 			if (chosen === friends[i].name) {
-				res.json(friends[i]);
+				response.json(friends[i]);
 				return;
 			}
 		}
 
-		res.json(false);
+		response.json(false);
 	} else {
-		res.json(friends);
+		response.json(friends);
 	}
 });
 
 // Create New friends - takes in JSON input
-app.post('/api/friends', function (req, res) {
-	var newcharacter = req.body;
+app.post('/api/friends', function (request, response) {
+	var newcharacter = request.body;
 	newcharacter.name = newcharacter.name.replace(/\s+/g, '').toLowerCase();
 
 	console.log(newcharacter);
 
 	friends.push(newcharacter);
 
-	res.json(newcharacter);
+	response.json(newcharacter);
 });
 
 app.listen(PORT, function () {
