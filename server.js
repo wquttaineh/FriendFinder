@@ -1,65 +1,51 @@
-// Dependencies
-var path 		= require('path');
-var express 	= require('express');
-var bodyParser  = require('body-parser');
+// ==============================================================================
+// DEPENDENCIES
+// Series of npm packages that we will use to give our server useful functionality
+// ==============================================================================
 
-// Sets up the Express App
-var app = express();
-var PORT = 9999,
+var express = require('express');
+var bodyParser = require('body-parser');
+var path = require('path');
 
-// Basic route that sends the user first to the AJAX Page
-app.get('/', function (request, response) {
-	response.sendFile(path.join(__dirname, 'home.html'));
-	// response.send('Hello World!');
-});
+// ==============================================================================
+// EXPRESS CONFIGURATION
+// This sets up the basic properties for our express server 
+// ==============================================================================
 
-app.get('/home', function (request, response) {
-	response.sendFile(path.join(__dirname, 'home.html'));
-});
+var app = express(); // Tells node that we are creating an "express" server
+var PORT = 9999; // Sets an initial port. We'll use this later in our listener
 
-app.get('/survey', function (request, response) {
-	response.sendFile(path.join(__dirname, 'survey.html'));
-});
-
-Sets up the Express app to handle data parsing
+// BodyParser makes it easy for our server to interpret data sent to it.
+// The code below is pretty standard.
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.text());
-app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+app.use(bodyParser.json({type:'application/vnd.api+json'}));
 
-var friends = [{
-  "name":"walid",
-  "photo":"pic1.jpg",
-  "scores":[
-     5,
-     1,
-     4,
-     4,
-     5,
-     1,
-     2,
-     5,
-     4,
-     1
-   ]
-},{
-	"name":"kevin",
-	"photo":"",
-	"scores":[
-	5,
-	1,
-	4,
-	4,
-	5,
-	1,
-	2,
-	5,
-	4,
-	1
-	]
-}];
+// ================================================================================
+// ROUTER
+// The below points our server to a series of "route" files.
+// These routes give our server a "map" of how to respond when users visit or request data from various URLs. 
+// ================================================================================
 
-// Search for Specific Character (or all frineds) - provides JSON
+require('./app/routing/api-routes.js')(app); 
+require('./app/routing/html-routes.js')(app);
+
+// // Basic route that sends the user first to the AJAX Page
+// app.get('/', function (request, response) {
+// 	response.sendFile(path.join(__dirname, 'home.html'));
+// 	// response.send('Hello World!');
+// });
+
+// app.get('/home', function (request, response) {
+// 	response.sendFile(path.join(__dirname, 'home.html'));
+// });
+
+// app.get('/survey', function (request, response) {
+// 	response.sendFile(path.join(__dirname, 'survey.html'));
+// });
+
+// // Search for Specific Character (or all frineds) - provides JSON
 app.get('/api/:friends?', function (request, response) {
 	var chosen = request.params.friends;
 
@@ -79,18 +65,24 @@ app.get('/api/:friends?', function (request, response) {
 	}
 });
 
-// Create New friends - takes in JSON input
+// // Create New friends - takes in JSON input
 app.post('/api/friends', function (request, response) {
-	var newcharacter = request.body;
-	newcharacter.name = newcharacter.name.replace(/\s+/g, '').toLowerCase();
+	var newFriends = request.body;
+	newFriends.name = newFriends.name.replace(/\s+/g, '').toLowerCase();
 
-	console.log(newcharacter);
+	console.log(newFriends);
 
-	friends.push(newcharacter);
+	friends.push(newFriends);
 
-	response.json(newcharacter);
+	response.json(newFriends);
 });
 
-app.listen(PORT, function () {
-	console.log('App listening on PORT ' + PORT);
+// ==============================================================================
+// LISTENER
+// The below code effectively "starts" our server 
+// ==============================================================================
+
+app.listen(PORT, function() {
+	console.log("App listening on PORT: " + PORT);
 });
+
